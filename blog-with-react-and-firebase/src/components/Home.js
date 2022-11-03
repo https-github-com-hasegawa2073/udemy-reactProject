@@ -1,5 +1,5 @@
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
+import { collection, deleteDoc, getDocs, doc } from "firebase/firestore";
+import { auth, db } from "../firebase";
 import React, { useEffect, useState } from "react";
 import "./Home.css";
 
@@ -16,7 +16,12 @@ const Home = () => {
       setPostLists(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
     };
     getPosts();
-  });
+  }, []);
+
+  const handleDelete = async (id) => {
+    await deleteDoc(doc(db, "posts", id));
+    window.location.href = "/";
+  };
 
   return (
     <div className="homePage">
@@ -29,7 +34,9 @@ const Home = () => {
             <div className="postTextContainer">{post.postsText}</div>
             <div className="nameAndDeleteButton">
               <h3>@{post.author.username}</h3>
-              <button>削除</button>
+              {post.author.id === auth.currentUser.uid && (
+                <button onClick={() => handleDelete(post.id)}>削除</button>
+              )}
             </div>
           </div>
         );
